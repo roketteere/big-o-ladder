@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive Big O explorer: every complexity class drawn to scale, plus a searchable catalog of data structures, algorithms, Java calls and loop shapes with their notation.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif;background:#f7f6f2}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Big O Ladder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --paper:#f7f6f2; --card:#ffffff; --ink:#15171c; --ink-2:#5a5e6b; --ink-3:#8b8f9b; --line:#dcdad3; --line-2:#ecebe6;
+  --accent:#2a78d6; --accent-ink:#ffffff; --focus:#2a78d6;
+  --c0:#2a78d6; --c1:#eb6834; --c2:#1baf7a; --c3:#eda100; --c4:#e87ba4; --c5:#008300; --c6:#4a3aa7;
+  --chip-0:#dbe9fb; --chip-1:#fde3d8; --chip-2:#d4f2e6; --chip-3:#fbedc4; --chip-4:#fbdfe9; --chip-5:#d6ecd6; --chip-6:#e1ddf5;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,Menlo,monospace; --sans:"IBM Plex Sans",system-ui,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#1a1a19; --card:#232322; --ink:#f3f2ec; --ink-2:#c3c2b7; --ink-3:#8f8e86; --line:#3a3a37; --line-2:#2d2d2b;
+    --accent:#3987e5; --accent-ink:#ffffff; --focus:#3987e5;
+    --c0:#3987e5; --c1:#d95926; --c2:#199e70; --c3:#c98500; --c4:#d55181; --c5:#008300; --c6:#9085e9;
+    --chip-0:#1f3652; --chip-1:#4a2a1c; --chip-2:#17392c; --chip-3:#43351a; --chip-4:#4a2634; --chip-5:#1e3a1e; --chip-6:#332f55;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#1a1a19; --card:#232322; --ink:#f3f2ec; --ink-2:#c3c2b7; --ink-3:#8f8e86; --line:#3a3a37; --line-2:#2d2d2b;
+  --accent:#3987e5; --accent-ink:#ffffff; --focus:#3987e5;
+  --c0:#3987e5; --c1:#d95926; --c2:#199e70; --c3:#c98500; --c4:#d55181; --c5:#008300; --c6:#9085e9;
+  --chip-0:#1f3652; --chip-1:#4a2a1c; --chip-2:#17392c; --chip-3:#43351a; --chip-4:#4a2634; --chip-5:#1e3a1e; --chip-6:#332f55;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:600;letter-spacing:-0.01em}
+h1{font-size:clamp(26px,3.4vw,36px)} h2{font-size:21px} h3{font-size:16px}
+p{margin:0;max-width:68ch}
+.lede{color:var(--ink-2);margin-top:6px}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+code,.mono{font-family:var(--mono);font-size:.93em}
+section{margin-top:44px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.muted{color:var(--ink-2)}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+
+/* search */
+.search{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:12px;margin-top:22px;border-bottom:1px solid var(--line)}
+.search-row{position:relative}
+#q{width:100%;padding:12px 44px 12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);font-size:16px}
+#q::placeholder{color:var(--ink-3)}
+.search-row .kbd{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:12px;font-family:var(--mono);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+#results{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.12);max-height:380px;overflow:auto;z-index:6}
+#results button{display:grid;grid-template-columns:1fr auto;gap:12px;width:100%;text-align:left;padding:10px 14px;background:none;border:0;border-bottom:1px solid var(--line-2);align-items:center}
+#results button:last-child{border-bottom:0}
+#results button:hover,#results button[aria-selected="true"]{background:var(--line-2)}
+#results .name{font-weight:500} #results .sub{color:var(--ink-2);font-size:13px}
+#results .empty{padding:14px;color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12.5px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--ink);white-space:nowrap}
+.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+
+/* answer card */
+#answer{margin-top:14px;border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;background:var(--card);padding:16px 18px;display:grid;gap:10px}
+#answer .big{font-family:var(--mono);font-size:30px;font-weight:500;line-height:1.1}
+#answer dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;margin:0}
+#answer dt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#answer dd{margin:0;font-family:var(--mono);font-size:14px}
+#answer .why{color:var(--ink-2)}
+
+/* ladder */
+.ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.rung{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:8px;background:var(--card);padding:12px 12px 10px;display:grid;gap:6px;cursor:pointer;text-align:left}
+.rung[aria-pressed="true"]{outline:2px solid var(--c);outline-offset:0}
+.rung .nm{font-family:var(--mono);font-size:19px;font-weight:500}
+.rung .lbl{font-size:13px;color:var(--ink-2)}
+.rung svg{width:100%;height:56px;display:block}
+.rung .at{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.rung .at b{color:var(--ink);font-family:var(--mono);font-weight:500}
+.ladder-note{display:flex;justify-content:space-between;color:var(--ink-3);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+
+/* main chart */
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:10px}
+.controls label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.controls input[type=range]{width:200px;accent-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{padding:5px 11px;background:var(--card);border:0;font-size:13px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
+.legend button{display:inline-flex;align-items:center;gap:7px;background:none;border:0;padding:3px 4px;font-family:var(--mono);font-size:13px;color:var(--ink)}
+.legend button i{width:18px;height:0;border-top:2.5px solid var(--c);display:inline-block}
+.legend button[aria-pressed="false"]{color:var(--ink-3)} .legend button[aria-pressed="false"] i{opacity:.25}
+.chart-wrap{position:relative}
+#chart{width:100%;height:auto;display:block;touch-action:none}
+.axis text{fill:var(--ink-3);font-size:11px;font-family:var(--mono)}
+.grid line{stroke:var(--line-2)} .axis line,.axis path{stroke:var(--line)}
+.series path{fill:none;stroke-width:2.25px;stroke-linejoin:round;stroke-linecap:round}
+.series text{font-family:var(--mono);font-size:11.5px;fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:3px}
+.xhair{stroke:var(--ink-3);stroke-dasharray:3 3;pointer-events:none}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12.5px;box-shadow:0 6px 20px rgba(0,0,0,.14);min-width:190px}
+.tip .n{font-family:var(--mono);color:var(--ink-2);margin-bottom:4px}
+.tip .r{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center;font-variant-numeric:tabular-nums}
+.tip .r i{height:0;border-top:2.5px solid var(--c);display:block}
+.tip .r b{font-family:var(--mono);font-weight:500}
+.tip .r span{color:var(--ink-2);font-family:var(--mono);font-size:12px}
+.attable{width:100%;border-collapse:collapse;margin-top:12px;font-variant-numeric:tabular-nums}
+.attable th,.attable td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line-2);font-size:13.5px}
+.attable th{color:var(--ink-3);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.attable td.mono{font-family:var(--mono)}
+
+/* catalog */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2)}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table.cat{width:100%;border-collapse:collapse;min-width:720px}
+table.cat th,table.cat td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top;font-size:14px}
+table.cat th{position:sticky;top:0;background:var(--card);color:var(--ink-3);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;z-index:1}
+table.cat td.nm{font-weight:500;white-space:nowrap}
+table.cat td.note{color:var(--ink-2);font-size:13px;min-width:220px}
+table.cat tr:last-child td{border-bottom:0}
+table.cat tr.hl td{background:var(--line-2)}
+.count{color:var(--ink-3);font-size:13px}
+.cheats{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.cheat{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:12px 14px;display:grid;gap:6px}
+.cheat pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.45;white-space:pre-wrap;color:var(--ink-2)}
+footer{margin-top:48px;color:var(--ink-3);font-size:13px}
+@media (max-width:640px){ .controls input[type=range]{width:140px} #answer .big{font-size:24px} table.cat{min-width:640px} }
+@media (prefers-reduced-motion:no-preference){ .series path{transition:opacity .2s} }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">CIS-055 Data Structures</div>
+  <h1>Big O Ladder</h1>
+  <p class="lede">Every complexity class from fastest to slowest, drawn to scale, with the data structures, algorithms, Java calls and code patterns that land on each rung. Type anything below to get its notation.</p>
+
+  <div class="search">
+    <div class="search-row">
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Type a data structure, algorithm, Java method or loop shape, e.g. hash map, merge sort, ArrayList.get, nested loop" aria-label="Search for a data structure, algorithm or operation" aria-controls="results" aria-expanded="false">
+      <span class="kbd">/</span>
+      <div id="results" role="listbox" hidden></div>
+    </div>
+  </div>
+  <div id="answer" hidden aria-live="polite"></div>
+
+  <details id="howto" style="margin-top:18px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:10px 14px">
+    <summary style="cursor:pointer;font-weight:600">How to use this page</summary>
+    <ol style="margin:8px 0 0;padding-left:20px;color:var(--ink-2);display:grid;gap:4px;max-width:70ch">
+      <li><b>Search.</b> Type a data structure, algorithm, Java method or loop shape in the box. Pick a result to see its Big O for every operation and why. Press <code>/</code> to jump to the box.</li>
+      <li><b>Ladder.</b> The seven rungs run fastest to slowest. Click one to filter the catalog to that class; click again to clear.</li>
+      <li><b>Chart.</b> Drag the n slider, switch log/linear, and hover to read every class at one n. Turn O(2ⁿ) and O(n!) on in the legend to see why brute force dies.</li>
+      <li><b>Catalog.</b> Four tabs: data structures, algorithms, Java calls, code patterns. A <code>*</code> means amortized or average case; the worst case is in the notes.</li>
+      <li><b>Code patterns.</b> The cards at the bottom are the loop and recursion shapes from class. Match the shape, name the class.</li>
+    </ol>
+  </details>
+
+  <section id="ladder-sec">
+    <div class="sec-head"><h2>The ladder</h2><span class="muted">Click a rung to filter the catalog below. Values shown at n = <b id="ladder-n" class="mono"></b>.</span></div>
+    <div class="ladder" id="ladder"></div>
+    <div class="ladder-note"><span>Fastest</span><span>Slowest</span></div>
+  </section>
+
+  <section id="chart-sec">
+    <div class="sec-head"><h2>Operations as n grows</h2><span class="muted">Hover or touch the chart to read every class at one n. O(2ⁿ) and O(n!) are off by default; switch them on in the legend to watch them leave the chart.</span></div>
+    <div class="panel">
+      <div class="controls">
+        <label for="nmax">n up to <b id="nmax-out" class="mono"></b><input id="nmax" type="range" min="1" max="6" step="0.01" value="2"></label>
+        <div class="seg" role="group" aria-label="y axis scale"><button id="y-log" aria-pressed="true">log y</button><button id="y-lin" aria-pressed="false">linear y</button></div>
+        <label for="rate">computer speed <select id="rate"><option value="1e6">1 million ops/s</option><option value="1e9" selected>1 billion ops/s</option><option value="1e12">1 trillion ops/s</option></select></label>
+      </div>
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 420" role="img" aria-label="Line chart of operations versus n for each complexity class"></svg>
+        <div id="tip" class="tip" hidden></div>
+      </div>
+      <div class="legend" id="legend" aria-label="Toggle series"></div>
+      <table class="attable" id="attable" aria-label="Operations and time for each class at the current n"><thead><tr><th>Class</th><th>Operations at n</th><th>Wall time at selected speed</th><th>Feels like</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section id="catalog-sec">
+    <div class="sec-head"><h2>Catalog</h2><span class="count" id="count"></span></div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="filters" id="filters"></div>
+    <div class="tscroll"><table class="cat" id="cat"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="patterns-sec">
+    <div class="sec-head"><h2>Read the code, name the class</h2><span class="muted">The shapes the professor used in the Week 5 lab.</span></div>
+    <div class="cheats" id="cheats"></div>
+  </section>
+
+  <footer>Big O is the asymptotic upper bound: the worst case as n grows without limit. Constants and lower-order terms are dropped, so 50 n is O(n) and 5 days is O(1). Ω is the lower bound, Θ is tight. Hash map figures assume a good hash function; the worst case for a hash map is O(n) when everything collides.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const CLS=[ // fastest -> slowest, fixed order = fixed hue slot
+ {id:"1",     n:"O(1)",       lbl:"constant",     f:n=>1,                       lg:n=>0},
+ {id:"logn",  n:"O(log n)",   lbl:"logarithmic",  f:n=>Math.max(1,Math.log2(n)),lg:n=>Math.log10(Math.max(1,Math.log2(n)))},
+ {id:"n",     n:"O(n)",       lbl:"linear",       f:n=>n,                       lg:n=>Math.log10(n)},
+ {id:"nlogn", n:"O(n log n)", lbl:"linearithmic", f:n=>n*Math.max(1,Math.log2(n)),lg:n=>Math.log10(n)+Math.log10(Math.max(1,Math.log2(n)))},
+ {id:"n2",    n:"O(n²)",      lbl:"quadratic",    f:n=>n*n,                     lg:n=>2*Math.log10(n)},
+ {id:"2n",    n:"O(2ⁿ)",      lbl:"exponential",  f:n=>Math.pow(2,n),           lg:n=>n*Math.log10(2)},
+ {id:"nf",    n:"O(n!)",      lbl:"factorial",    f:n=>fact(n),                 lg:n=>lgfact(n)},
+];
+const IDX=Object.fromEntries(CLS.map((c,i)=>[c.id,i]));
+function fact(n){let r=1;for(let i=2;i<=n;i++){r*=i;if(!isFinite(r))break;}return r;}
+function lgfact(n){let s=0;for(let i=2;i<=n;i++)s+=Math.log10(i);return s;} // exact log10(n!) for the n we plot
+const fmt=v=>{if(!isFinite(v))return"∞";if(v<1e4)return Math.round(v).toLocaleString();const e=Math.floor(Math.log10(v));const m=v/Math.pow(10,e);return m.toFixed(2)+"e"+e;};
+const fmtLg=l=>{if(!isFinite(l))return"∞";if(l<4)return Math.round(Math.pow(10,l)).toLocaleString();const e=Math.floor(l);return Math.pow(10,l-e).toFixed(2)+"e"+e;};
+function timeStr(lgOps,rate){ // lgOps = log10(ops)
+  const lgs=lgOps-Math.log10(rate); if(lgs<-3)return"under a millisecond";
+  const s=Math.pow(10,lgs); const u=[[31557600*1e9,"billion years"],[31557600*1e6,"million years"],[31557600*1000,"thousand years"],[31557600,"years"],[86400,"days"],[3600,"hours"],[60,"minutes"],[1,"seconds"],[1e-3,"ms"]];
+  if(lgs>40)return"10^"+Math.round(lgs)+" seconds";
+  for(const [k,name] of u){if(s>=k)return (s/k).toPrecision(3).replace(/\.?0+$/,"")+" "+name;} return s.toPrecision(2)+" s";
+}
+const FEEL={"1":"same cost for 10 or 10 billion items","logn":"doubling n adds one step","n":"one pass over everything","nlogn":"the best general sort can do","n2":"every item against every item; brute force","2n":"every subset; brute-force passwords","nf":"every ordering; travelling salesman by brute force"};
+
+/* ---------- catalog data: cls per operation ---------- */
+const DS=[ // [name, aliases, access, search, insert, delete, space, note]
+ ["Array",["static array","int[]","array index"],"1","n","n","n","n","Read/write by index is pure arithmetic: addr = base + index × size. Insert/delete in the middle shifts elements."],
+ ["Dynamic array / ArrayList",["arraylist","vector","list","resizable array","java.util.ArrayList"],"1","n","1*","n","n","add at end is amortized O(1); insert/remove at index i shifts n − i items (remove(0) is O(n))."],
+ ["Singly linked list",["linked list","sll","node list"],"n","n","1","1","n","Insert/delete at a known node is O(1); reaching position k costs O(k). No index arithmetic."],
+ ["Doubly linked list",["dll","java.util.LinkedList","linkedlist"],"n","n","1","1","n","Same as singly, plus O(1) delete of the current node and backward traversal."],
+ ["Stack",["lifo","push pop","java.util.Stack","Deque as stack"],"n","n","1","1","n","push, pop, peek are O(1). Undo/redo, matching brackets, sock pairs, DFS."],
+ ["Queue",["fifo","enqueue dequeue","ArrayDeque","java.util.Queue"],"n","n","1","1","n","offer, poll, peek are O(1). Lines, BFS, printers. ArrayDeque beats LinkedList in Java."],
+ ["Deque",["double ended queue","ArrayDeque"],"n","n","1","1","n","O(1) at both ends."],
+ ["Hash map",["hashmap","hash table","dictionary","dict","associative array","unordered_map","java.util.HashMap","map"],"—","1*","1*","1*","n","get/put/remove average O(1) with a good hash; worst O(n) if everything collides. The professor's favorite: most interview problems use one."],
+ ["Hash set",["hashset","set","unordered_set","java.util.HashSet"],"—","1*","1*","1*","n","contains/add/remove average O(1). Dedup, uniqueness tests, the Pyramids no-duplicates report."],
+ ["Binary search tree (average)",["bst","binary tree","treemap average"],"log n","log n","log n","log n","n","Balanced-ish input. In-order traversal prints sorted order in O(n)."],
+ ["Binary search tree (worst)",["unbalanced bst","degenerate tree"],"n","n","n","n","n","Sorted input turns it into a linked list."],
+ ["Balanced BST (AVL, Red-Black, TreeMap)",["avl","red black tree","treemap","java.util.TreeMap","treeset","self balancing tree"],"log n","log n","log n","log n","n","Rotations keep height O(log n) so every operation stays logarithmic."],
+ ["Binary heap / PriorityQueue",["heap","min heap","max heap","priority queue","java.util.PriorityQueue"],"1*","n","log n","log n","n","peek min/max O(1); insert and remove-min O(log n); build-heap from an array O(n). Heap sort, Dijkstra, Prim."],
+ ["Trie",["prefix tree","autocomplete tree"],"—","k","k","k","n·k","k = key length, independent of how many keys are stored. Autocomplete, spell check."],
+ ["Graph, adjacency list",["adjacency list","graph list"],"—","deg(v)","1","deg(v)","V + E","Edge lookup scans a vertex's neighbors. Best for sparse graphs (most real ones)."],
+ ["Graph, adjacency matrix",["adjacency matrix","graph matrix"],"1","1","1","1","V²","O(1) edge test but V² memory even when empty. Listing neighbors is O(V)."],
+ ["String (immutable, Java)",["string","java.lang.String","charAt","string concat"],"1","n","n","n","n","charAt O(1); concatenation in a loop copies every time → O(n²) total; use StringBuilder for O(n)."],
+ ["StringBuilder",["stringbuilder","stringbuffer"],"1","n","1*","n","n","append is amortized O(1)."],
+ ["Sorted array",["sorted list"],"1","log n","n","n","n","Binary search is O(log n) but keeping it sorted costs O(n) per insert."],
+ ["Skip list",["skiplist","ConcurrentSkipListMap"],"log n","log n","log n","log n","n log n","Probabilistic balanced structure; Java's concurrent sorted map."],
+ ["Bloom filter",["bloom"],"—","k","k","—","m bits","k hash functions; may say yes falsely, never no falsely."],
+];
+const ALG=[ // [name, aliases, best, average, worst, space, note]
+ ["Bubble sort",["bubble"],"n","n²","n²","1","n passes swapping neighbors; larger values bubble to the end. Best case O(n) only with the early-exit flag."],
+ ["Insertion sort",["insertion"],"n","n²","n²","1","Great on nearly-sorted or tiny inputs; the inner piece of TimSort."],
+ ["Selection sort",["selection"],"n²","n²","n²","1","Always scans the rest for the minimum; no best case."],
+ ["Merge sort",["mergesort","merge"],"n log n","n log n","n log n","n","Recursive halves; the merge step is O(n). Stable."],
+ ["Quick sort",["quicksort","quick"],"n log n","n log n","n²","log n","Worst case on bad pivots (already sorted + naive pivot). In-place, not stable."],
+ ["Heap sort",["heapsort"],"n log n","n log n","n log n","1","Build a heap O(n), pop n times O(log n) each. In place, O(1) extra storage."],
+ ["TimSort (Java & Python default)",["timsort","Arrays.sort objects","Collections.sort","List.sort","sorted()"],"n","n log n","n log n","n","Stable hybrid of merge + insertion sort; adopted by Java (objects) and Python."],
+ ["Dual-pivot quicksort (Java primitives)",["Arrays.sort int[]","Arrays.sort primitives"],"n log n","n log n","n²","log n","What Arrays.sort uses for int[], double[] etc."],
+ ["Counting sort",["counting"],"n + k","n + k","n + k","k","Not comparison based; k = value range. The Week 7 missile lab."],
+ ["Radix sort",["radix"],"d·n","d·n","d·n","n + k","d digits of counting sort."],
+ ["Bucket sort",["bucket"],"n + k","n + k","n²","n","Uniformly spread input."],
+ ["Linear search",["sequential search","scan","indexOf","contains on a list"],"1","n","n","1","Check every element; the only option on unsorted data."],
+ ["Binary search",["bsearch","Arrays.binarySearch","Collections.binarySearch"],"1","log n","log n","1","Halve the sorted range each step: i /= 2 shape."],
+ ["Breadth-first search",["bfs","level order"],"V + E","V + E","V + E","V","Queue, level by level. Shortest path in an unweighted graph."],
+ ["Depth-first search",["dfs","preorder","postorder"],"V + E","V + E","V + E","V","Stack or recursion; go deep then backtrack."],
+ ["Tree traversal (in/pre/post-order)",["inorder","in-order","traversal","tree walk"],"n","n","n","h","Every node once. In-order on a BST yields sorted output."],
+ ["Dijkstra (binary heap)",["dijkstra","shortest path"],"(V + E) log V","(V + E) log V","(V + E) log V","V","Positive weights only; heap holds the frontier."],
+ ["Prim (binary heap)",["prim","minimum spanning tree"],"E log V","E log V","E log V","V","Grows one tree with a heap."],
+ ["Kruskal",["kruskal","union find mst"],"E log E","E log E","E log E","V","Sort edges, union-find."],
+ ["Topological sort",["toposort","kahn"],"V + E","V + E","V + E","V","DAG ordering via DFS or Kahn's queue."],
+ ["Fast power (divide and conquer)",["fast exponentiation","power recursive","x^n","pow","exponentiation by squaring"],"log n","log n","log n","log n","power(x, n) = power(x, n/2)²; the extra-credit assignment's known solution."],
+ ["Naive power (multiply n times)",["naive pow","loop power"],"n","n","n","1","x · x · x … n times."],
+ ["Naive recursive Fibonacci",["fibonacci recursive","fib"],"2ⁿ","2ⁿ","2ⁿ","n","Two calls per level with no memo; memoized or iterative is O(n)."],
+ ["Generate all subsets",["power set","subsets"],"2ⁿ","2ⁿ","2ⁿ","n","Each item in or out."],
+ ["Generate all permutations",["permutations","anagrams brute force","travelling salesman brute force","tsp"],"n!","n!","n!","n","Every ordering; hopeless past n ≈ 12."],
+ ["Matrix multiplication (naive)",["matrix multiply"],"n³","n³","n³","n²","Three nested loops; Strassen is about n^2.81."],
+ ["Two Sum with a hash map",["two sum","pair sum"],"n","n","n","n","One pass, map of seen values; the brute force pair loop is O(n²)."],
+ ["Undo / redo with two stacks",["undo redo","cavazos commander"],"1","1","1","n","Each undo or redo is one pop and one push: the Cavazos app."],
+];
+const JAVA=[ // [call, aliases, cls, note]
+ ["ArrayList.get(i)",["list.get"],"1","Index arithmetic on the backing array."],
+ ["ArrayList.add(x)",["list.add"],"1*","Amortized; a resize copies the array (O(n)) every so often."],
+ ["ArrayList.add(0, x) / remove(0)",["insert at front","remove first arraylist"],"n","Shifts every element."],
+ ["ArrayList.contains / indexOf",["contains"],"n","Linear scan."],
+ ["LinkedList.get(i)",["linkedlist get"],"n","Walks from the head (or tail)."],
+ ["LinkedList.addFirst / removeFirst",["addfirst","removefirst"],"1","Pointer updates only."],
+ ["HashMap.get / put / containsKey",["hashmap get","hashmap put","map.get","map.put"],"1*","Average; worst O(n) under heavy collisions (Java 8 treeifies buckets to O(log n))."],
+ ["HashSet.contains / add",["hashset contains","set.add"],"1*","Same as HashMap."],
+ ["TreeMap.get / put",["treemap get"],"log n","Red-black tree."],
+ ["PriorityQueue.offer / poll",["pq offer","pq poll"],"log n","Binary heap sift."],
+ ["PriorityQueue.peek",["pq peek"],"1","Root of the heap."],
+ ["Stack.push / pop / peek",["stack push","stack pop"],"1","Top of the array or list."],
+ ["ArrayDeque.offer / poll",["queue offer","queue poll"],"1","Circular buffer."],
+ ["String.charAt(i)",["charat"],"1","Backing array index."],
+ ["String s += x in a loop",["string concatenation loop","s += "],"n²","Each += copies the whole string; total 1+2+…+n."],
+ ["StringBuilder.append",["sb.append"],"1*","Amortized."],
+ ["Arrays.sort(int[])",["arrays.sort"],"n log n","Dual-pivot quicksort."],
+ ["Collections.sort / List.sort",["collections.sort"],"n log n","TimSort, stable."],
+ ["Arrays.binarySearch",["binarysearch"],"log n","Sorted input required."],
+ ["Collections.max / min",["max","min"],"n","Scans the whole collection."],
+ ["Math.pow(x, n)",["math.pow"],"1","Hardware floating-point; not the recursive exercise."],
+ ["Integer.parseInt(s)",["parseint"],"d","d digits; effectively O(1) for an int."],
+ ["JSONParser.parse(file)",["json parse","json-simple"],"n","Reads every character of the file once."],
+];
+const PAT=[ // [name, aliases, cls, code, why]
+ ["Single loop over n",["for loop","one loop","single for"],"n","for (int i = 0; i < n; i++) {\n  doConstantWork();\n}","n iterations × O(1) each."],
+ ["Fifty separate loops over n",["50 loops","sheila","consecutive loops"],"n","for (k = 0; k < 50; k++)\n  for (i = 0; i < n; i++)\n    singASong();","50 n → drop the constant → O(n). Sheila beats Jun."],
+ ["Nested loop over n",["nested loop","double loop","loop inside loop","jun","two for loops"],"n²","for (i = 0; i < n; i++)\n  for (j = 0; j < n; j++)\n    singASong();","n × n iterations."],
+ ["Triple nested loop",["three nested loops","triple loop"],"n³","for i … for j … for k …","n × n × n."],
+ ["Halving loop",["i /= 2","divide by two","google magic","halve"],"log n","i = n; count = 0;\nwhile (i > 0) {\n  count += magic(arr); // O(1)\n  i /= 2;\n}","i takes log₂ n steps to reach 0: the Week 5 Google task."],
+ ["Loop over n with a halving inner loop",["n log n loop"],"n log n","for (i = 0; i < n; i++)\n  for (j = n; j > 0; j /= 2) …","n outer × log n inner."],
+ ["Fixed amount of work",["constant","juanita","5 days","no loop","direct lookup"],"1","return items[5];","Juanita's 5-day display is O(1): slow, but constant. Jose's n seconds is O(n)."],
+ ["Recursion with one call of size n − 1",["linear recursion","countdown recursion"],"n","int sum(n) { return n == 0 ? 0 : n + sum(n - 1); }","n frames deep."],
+ ["Recursion with one call of size n / 2",["divide by two recursion","fast power shape"],"log n","double power(x, n) {\n  if (n == 0) return 1;\n  double h = power(x, n / 2);\n  return n % 2 == 0 ? h * h : h * h * x;\n}","Each call halves n: the extra-credit power function."],
+ ["Recursion with two calls of size n − 1",["two recursive calls","fib shape","branching recursion"],"2ⁿ","int fib(n) { return n < 2 ? n : fib(n-1) + fib(n-2); }","The call tree doubles at every level."],
+ ["Two calls of size n / 2 plus O(n) merge",["divide and conquer","merge sort shape"],"n log n","sort(left); sort(right); merge(left, right);","log n levels × n work per level."],
+ ["Try every ordering",["all permutations","brute force ordering"],"n!","permute(prefix, rest) for every choice of next","n choices, then n − 1, then n − 2 …"],
+];
+
+/* ---------- normalize a complexity string to a class id ---------- */
+function clsOf(s){
+  const t=String(s).replace(/\*/g,"").replace(/\s+/g,"").toLowerCase();
+  if(t==="—"||t==="")return null;
+  if(t==="1"||t==="k"||t==="d")return"1";
+  if(/^log/.test(t))return"logn";
+  if(t==="n"||t==="n+k"||t==="d·n"||t==="d*n"||t==="v+e"||t==="deg(v)"||t==="h"||t==="v"||t==="e")return"n";
+  if(t==="nlogn"||t.includes("logv")||t.includes("loge")||t==="n·k")return"nlogn";
+  if(t==="n²"||t==="n^2"||t==="v²"||t==="n³"||t==="n^3")return"n2";
+  if(t==="2ⁿ"||t==="2^n")return"2n";
+  if(t==="n!")return"nf";
+  return null;
+}
+const chip=(txt,cid,extra)=>{const c=clsOf(txt);const i=c==null?null:IDX[c];const el=document.createElement("span");el.className="chip";el.textContent=(txt==="—"?"n/a":"O("+txt+")")+(extra||"");if(i!=null){el.style.setProperty("--c","var(--c"+i+")");el.style.setProperty("--chip","var(--chip-"+i+")");}else{el.style.setProperty("--c","var(--ink-3)");el.style.setProperty("--chip","var(--line-2)");}return el;};
+
+/* ---------- search index ---------- */
+const ENTRIES=[];
+DS.forEach(r=>ENTRIES.push({kind:"Data structure",name:r[0],alias:r[1],main:r[5],ops:{access:r[2],search:r[3],insert:r[4],delete:r[5],space:r[6]},note:r[7]}));
+ALG.forEach(r=>ENTRIES.push({kind:"Algorithm",name:r[0],alias:r[1],main:r[4],ops:{best:r[2],average:r[3],worst:r[4],space:r[5]},note:r[6]}));
+JAVA.forEach(r=>ENTRIES.push({kind:"Java call",name:r[0],alias:r[1],main:r[2],ops:{time:r[2]},note:r[3]}));
+PAT.forEach(r=>ENTRIES.push({kind:"Code pattern",name:r[0],alias:r[1],main:r[2],ops:{time:r[2]},note:r[4],code:r[3]}));
+CLS.forEach(c=>ENTRIES.push({kind:"Complexity class",name:c.n,alias:[c.lbl,c.n.replace(/[()]/g,""),c.id],main:c.n.slice(2,-1),ops:{},note:FEEL[c.id]+". "+ ({"1":"Examples: array index, hash map get, stack push, heap peek.","logn":"Examples: binary search, balanced tree ops, heap insert, halving loops.","n":"Examples: linear search, one loop, list traversal, BFS/DFS on V+E.","nlogn":"Examples: merge sort, heap sort, TimSort, Arrays.sort.","n2":"Examples: bubble/insertion/selection sort, nested loops, string += in a loop.","2n":"Examples: naive Fibonacci, all subsets, brute-force passwords.","nf":"Examples: all permutations, travelling salesman by brute force."}[c.id])}));
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9²³ⁿ!+·()\/]/g," ").replace(/\s+/g," ").trim();
+function score(e,q){
+  const hay=[e.name,...e.alias].map(norm); const qn=norm(q); if(!qn)return 0;
+  let best=0;
+  for(const h of hay){ if(h===qn)best=Math.max(best,100); else if(h.startsWith(qn))best=Math.max(best,80); else if(h.includes(qn))best=Math.max(best,60);
+    else{const toks=qn.split(" ");const hit=toks.filter(t=>t&&h.includes(t)).length;if(hit)best=Math.max(best,30*hit/toks.length);} }
+  if(norm(e.note).includes(qn))best=Math.max(best,20);
+  return best;
+}
+const q=$("#q"),res=$("#results"),ans=$("#answer"); let sel=-1,cur=[];
+function doSearch(){
+  const v=q.value.trim(); res.textContent="";
+  if(!v){res.hidden=true;q.setAttribute("aria-expanded","false");return;}
+  cur=ENTRIES.map(e=>[score(e,v),e]).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,10).map(x=>x[1]);
+  if(!cur.length){const d=document.createElement("div");d.className="empty";d.textContent="No match. Try the structure's other name (dictionary, vector, min heap) or a loop shape (nested loop, halving loop).";res.appendChild(d);}
+  cur.forEach((e,i)=>{const b=document.createElement("button");b.setAttribute("role","option");b.id="opt"+i;
+    const l=document.createElement("div");const nm=document.createElement("div");nm.className="name";nm.textContent=e.name;const sb=document.createElement("div");sb.className="sub";sb.textContent=e.kind;l.append(nm,sb);
+    b.append(l,chip(e.main));b.addEventListener("click",()=>show(e));res.appendChild(b);});
+  sel=-1;res.hidden=false;q.setAttribute("aria-expanded","true");
+}
+function show(e){
+  q.value=e.name;res.hidden=true;q.setAttribute("aria-expanded","false");ans.textContent="";ans.hidden=false;
+  const c=clsOf(e.main);const i=c==null?null:IDX[c];ans.style.setProperty("--c",i==null?"var(--ink-3)":"var(--c"+i+")");
+  const k=document.createElement("div");k.className="eyebrow";k.textContent=e.kind; const big=document.createElement("div");big.className="big";big.textContent=e.name+"  →  O("+e.main.replace(/\*/g,"")+")"+(i==null?"":"  ·  "+CLS[i].lbl);
+  const dl=document.createElement("dl");Object.entries(e.ops).forEach(([kk,vv])=>{const dt=document.createElement("dt");dt.textContent=kk;const dd=document.createElement("dd");dd.appendChild(chip(vv,null,String(vv).includes("*")?" amortized/avg":""));dl.append(dt,dd);});
+  const why=document.createElement("div");why.className="why";why.textContent=e.note;
+  ans.append(k,big); if(Object.keys(e.ops).length)ans.appendChild(dl); ans.appendChild(why);
+  if(e.code){const pre=document.createElement("pre");pre.className="mono";pre.style.margin="0";pre.style.whiteSpace="pre-wrap";pre.style.color="var(--ink-2)";pre.textContent=e.code;ans.appendChild(pre);}
+  if(i!=null){const go=document.createElement("a");go.href="#ladder-sec";go.textContent="See "+CLS[i].n+" on the ladder";go.addEventListener("click",ev=>{ev.preventDefault();setFilter(CLS[i].id);document.getElementById("ladder-sec").scrollIntoView({behavior:"smooth",block:"start"});});ans.appendChild(go);}
+}
+q.addEventListener("input",doSearch);
+q.addEventListener("keydown",ev=>{ if(res.hidden)return; const opts=[...res.querySelectorAll("button")];
+  if(ev.key==="ArrowDown"){ev.preventDefault();sel=Math.min(opts.length-1,sel+1);} else if(ev.key==="ArrowUp"){ev.preventDefault();sel=Math.max(0,sel-1);} else if(ev.key==="Enter"){ev.preventDefault();if(cur[Math.max(0,sel)])show(cur[Math.max(0,sel)]);return;} else if(ev.key==="Escape"){res.hidden=true;return;} else return;
+  opts.forEach((o,i)=>o.setAttribute("aria-selected",i===sel?"true":"false")); if(opts[sel])opts[sel].scrollIntoView({block:"nearest"}); });
+document.addEventListener("click",ev=>{if(!ev.target.closest(".search-row"))res.hidden=true;});
+document.addEventListener("keydown",ev=>{if(ev.key==="/"&&document.activeElement!==q&&!/input|select|textarea/i.test(document.activeElement.tagName)){ev.preventDefault();q.focus();}});
+
+/* ---------- ladder ---------- */
+let nMax=100, logY=true, rate=1e9, filter=null, on=[true,true,true,true,true,false,false]; // 2ⁿ and n! start off: on they flatten the other five into the bottom strip
+const ladder=$("#ladder");
+function sparkPath(c,w,h){const pts=[];const N=24;let max=-Infinity;const vals=[];for(let i=1;i<=N;i++){const n=i;const v=c.lg(n);vals.push(v);max=Math.max(max,v);} const span=Math.max(0.5,max);
+  for(let i=0;i<N;i++){const x=4+(w-8)*i/(N-1);const y=h-4-(h-8)*(vals[i]/span);pts.push((i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1));} return pts.join(" ");}
+function buildLadder(){ladder.textContent="";CLS.forEach((c,i)=>{const b=document.createElement("button");b.className="rung";b.style.setProperty("--c","var(--c"+i+")");b.setAttribute("aria-pressed","false");b.dataset.id=c.id;
+  const nm=document.createElement("div");nm.className="nm";nm.textContent=c.n;const lbl=document.createElement("div");lbl.className="lbl";lbl.textContent=c.lbl;
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 120 56");svg.setAttribute("aria-hidden","true");const p=document.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d",sparkPath(c,120,56));p.setAttribute("fill","none");p.setAttribute("stroke","var(--c"+i+")");p.setAttribute("stroke-width","2.25");p.setAttribute("stroke-linecap","round");svg.appendChild(p);
+  const at=document.createElement("div");at.className="at";b.append(nm,lbl,svg,at);b.addEventListener("click",()=>setFilter(filter===c.id?null:c.id));ladder.appendChild(b);});}
+function updateLadder(){const n=Math.round(nMax);$("#ladder-n").textContent=n.toLocaleString();ladder.querySelectorAll(".rung").forEach((b,i)=>{const c=CLS[i];const lg=c.lg(n);b.querySelector(".at").innerHTML="";const at=b.querySelector(".at");at.append("≈ ");const bb=document.createElement("b");bb.textContent=fmtLg(lg);at.append(bb," ops");b.setAttribute("aria-pressed",filter===c.id?"true":"false");});}
+function setFilter(id){filter=id;updateLadder();renderCat();$("#filters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",(b.dataset.id||null)===filter?"true":"false"));}
+
+/* ---------- main chart ---------- */
+const svg=$("#chart"),tip=$("#tip"),W=960,H=420,M={l:64,r:96,t:16,b:40};
+const NS="http://www.w3.org/2000/svg";const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+function yVal(c,n){return logY?c.lg(n):c.f(n);}
+function draw(){
+  svg.textContent="";const n1=1,n2=Math.max(2,Math.round(nMax));const xs=n=>M.l+(W-M.l-M.r)*(n-n1)/(n2-n1);
+  const pw=W-M.l-M.r,ph=H-M.t-M.b; const samples=[];for(let i=0;i<=160;i++)samples.push(n1+(n2-n1)*i/160);
+  let ymax=0; CLS.forEach((c,i)=>{if(!on[i])return;const v=yVal(c,n2);if(isFinite(v))ymax=Math.max(ymax,v);});
+  if(logY)ymax=Math.max(1,Math.ceil(ymax));else{ // linear: cap so the slow classes don't flatten everything; clip at 20× the quadratic value, show "clipped"
+    const cap=Math.max(10,20*CLS[IDX.n2].f(n2));ymax=Math.min(ymax,cap);}
+  const ys=v=>M.t+ph-ph*Math.min(1.08,Math.max(0,v/ymax));
+  const g=el("g",{class:"grid"});const ticks=logY?Array.from({length:ymax+1},(_,i)=>i).filter((v,i,a)=>a.length<=10||i%Math.ceil(a.length/8)===0):Array.from({length:6},(_,i)=>ymax*i/5);
+  ticks.forEach(v=>{g.appendChild(el("line",{x1:M.l,x2:W-M.r,y1:ys(v),y2:ys(v)}));});svg.appendChild(g);
+  const ax=el("g",{class:"axis"});ax.appendChild(el("line",{x1:M.l,x2:W-M.r,y1:M.t+ph,y2:M.t+ph}));
+  ticks.forEach(v=>{const t=el("text",{x:M.l-8,y:ys(v)+4,"text-anchor":"end"});t.textContent=logY?(v===0?"1":"10^"+v):fmt(v);ax.appendChild(t);});
+  const xt=5;for(let i=0;i<=xt;i++){const n=Math.round(n1+(n2-n1)*i/xt);const t=el("text",{x:xs(n),y:M.t+ph+18,"text-anchor":"middle"});t.textContent=n.toLocaleString();ax.appendChild(t);}
+  const xl=el("text",{x:M.l+pw/2,y:H-4,"text-anchor":"middle"});xl.textContent="n (input size)";ax.appendChild(xl);
+  const yl=el("text",{x:14,y:M.t+ph/2,transform:"rotate(-90 14 "+(M.t+ph/2)+")","text-anchor":"middle"});yl.textContent=logY?"operations (log scale)":"operations";ax.appendChild(yl);svg.appendChild(ax);
+  const sg=el("g",{class:"series"});
+  CLS.forEach((c,i)=>{if(!on[i])return;let d="",pen=false,clipped=false;samples.forEach(n=>{let v=yVal(c,n);if(!isFinite(v)){clipped=true;return;}if(!logY&&v>ymax*1.08){v=ymax*1.08;clipped=true;}const x=xs(n),y=ys(v);d+=(pen?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)+" ";pen=true;});
+    const p=el("path",{d,stroke:"var(--c"+i+")"});p.dataset.i=i;sg.appendChild(p);
+    const vEnd=yVal(c,n2);const yEnd=isFinite(vEnd)?ys(Math.min(vEnd,logY?vEnd:ymax*1.08)):M.t;const t=el("text",{x:W-M.r+8,y:yEnd+4});t.textContent=c.n+(clipped&&!logY?" ↑":"");t.style.fill="var(--c"+i+")";sg.appendChild(t);});
+  svg.appendChild(sg); // resolve overlapping end labels
+  const labels=[...sg.querySelectorAll("text")].sort((a,b)=>+a.getAttribute("y")-+b.getAttribute("y"));let last=-Infinity;labels.forEach(t=>{let y=+t.getAttribute("y");if(y-last<13)y=last+13;t.setAttribute("y",y);last=y;});
+  svg.appendChild(el("line",{class:"xhair",id:"xhair",x1:0,x2:0,y1:M.t,y2:M.t+ph,visibility:"hidden"}));
+  svg._xs=xs;svg._ys=ys;svg._n=[n1,n2];
+}
+function hover(ev){const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)*W/r.width;const [n1,n2]=svg._n;let n=Math.round(n1+(n2-n1)*(px-M.l)/(W-M.l-M.r));if(n<n1||n>n2){leave();return;}
+  const x=svg._xs(n);const xh=$("#xhair");xh.setAttribute("x1",x);xh.setAttribute("x2",x);xh.setAttribute("visibility","visible");
+  tip.textContent="";const nn=document.createElement("div");nn.className="n";nn.textContent="n = "+n.toLocaleString();tip.appendChild(nn);
+  CLS.forEach((c,i)=>{if(!on[i])return;const row=document.createElement("div");row.className="r";row.style.setProperty("--c","var(--c"+i+")");const ii=document.createElement("i");const b=document.createElement("b");b.textContent=fmtLg(c.lg(n));const s=document.createElement("span");s.textContent=c.n;row.append(ii,b,s);tip.appendChild(row);});
+  tip.hidden=false;const tw=tip.offsetWidth;const left=(x/W)*r.width;tip.style.left=(left+14+tw>r.width?left-tw-14:left+14)+"px";tip.style.top=Math.max(0,(ev.clientY-r.top)-20)+"px";}
+function leave(){tip.hidden=true;const xh=$("#xhair");if(xh)xh.setAttribute("visibility","hidden");}
+svg.addEventListener("pointermove",hover);svg.addEventListener("pointerleave",leave);svg.addEventListener("pointerdown",hover);
+function buildLegend(){const lg=$("#legend");lg.textContent="";CLS.forEach((c,i)=>{const b=document.createElement("button");b.style.setProperty("--c","var(--c"+i+")");b.setAttribute("aria-pressed",on[i]?"true":"false");const ii=document.createElement("i");b.append(ii,c.n);b.addEventListener("click",()=>{on[i]=!on[i];b.setAttribute("aria-pressed",on[i]?"true":"false");draw();});lg.appendChild(b);});}
+function updateTable(){const tb=$("#attable tbody");tb.textContent="";const n=Math.round(nMax);CLS.forEach((c,i)=>{const tr=document.createElement("tr");const td1=document.createElement("td");td1.appendChild(chip(c.n.slice(2,-1)));const td2=document.createElement("td");td2.className="mono";td2.textContent=fmtLg(c.lg(n));const td3=document.createElement("td");td3.className="mono";td3.textContent=timeStr(c.lg(n),rate);const td4=document.createElement("td");td4.textContent=FEEL[c.id];td4.style.color="var(--ink-2)";tr.append(td1,td2,td3,td4);tb.appendChild(tr);});}
+const nmax=$("#nmax");function setN(){nMax=Math.round(Math.pow(10,+nmax.value));$("#nmax-out").textContent=nMax.toLocaleString();draw();updateLadder();updateTable();}
+nmax.addEventListener("input",setN);
+$("#y-log").addEventListener("click",()=>{logY=true;$("#y-log").setAttribute("aria-pressed","true");$("#y-lin").setAttribute("aria-pressed","false");draw();});
+$("#y-lin").addEventListener("click",()=>{logY=false;$("#y-log").setAttribute("aria-pressed","false");$("#y-lin").setAttribute("aria-pressed","true");draw();});
+$("#rate").addEventListener("change",e=>{rate=+e.target.value;updateTable();});
+
+/* ---------- catalog ---------- */
+const TABS=[["ds","Data structures"],["alg","Algorithms"],["java","Java calls"],["pat","Code patterns"]];let tab="ds";
+function buildTabs(){const t=$("#tabs");TABS.forEach(([id,l])=>{const b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",tab===id?"true":"false");b.textContent=l;b.addEventListener("click",()=>{tab=id;t.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));renderCat();});t.appendChild(b);});
+  const f=$("#filters");const all=document.createElement("button");all.textContent="All classes";all.setAttribute("aria-pressed","true");all.addEventListener("click",()=>setFilter(null));f.appendChild(all);
+  CLS.forEach((c,i)=>{const b=document.createElement("button");b.dataset.id=c.id;b.setAttribute("aria-pressed","false");b.textContent=c.n;b.addEventListener("click",()=>setFilter(filter===c.id?null:c.id));f.appendChild(b);});}
+function rowMatches(cells){if(!filter)return true;return cells.some(v=>clsOf(v)===filter);}
+function renderCat(){const th=$("#cat thead"),tb=$("#cat tbody");th.textContent="";tb.textContent="";let rows=[],head=[];
+  if(tab==="ds"){head=["Structure","Access","Search","Insert","Delete","Space","Notes"];DS.forEach(r=>{if(rowMatches(r.slice(2,7)))rows.push([r[0],...r.slice(2,7).map(v=>chip(v,null,String(v).includes("*")?"*":"")),r[7]]);});}
+  else if(tab==="alg"){head=["Algorithm","Best","Average","Worst","Space","Notes"];ALG.forEach(r=>{if(rowMatches(r.slice(2,6)))rows.push([r[0],...r.slice(2,6).map(v=>chip(v)),r[6]]);});}
+  else if(tab==="java"){head=["Call","Time","Notes"];JAVA.forEach(r=>{if(rowMatches([r[2]]))rows.push([r[0],chip(r[2],null,String(r[2]).includes("*")?"*":""),r[3]]);});}
+  else {head=["Pattern","Class","Shape","Why"];PAT.forEach(r=>{if(rowMatches([r[2]]))rows.push([r[0],chip(r[2]),r[3],r[4]]);});}
+  const trh=document.createElement("tr");head.forEach(h=>{const t=document.createElement("th");t.textContent=h;trh.appendChild(t);});th.appendChild(trh);
+  rows.forEach(r=>{const tr=document.createElement("tr");r.forEach((v,i)=>{const td=document.createElement("td");if(i===0){td.className="nm";td.textContent=v;}else if(v instanceof Node){td.appendChild(v);}else if(i===r.length-1||(tab==="pat"&&i===2)){td.className=(tab==="pat"&&i===2)?"mono":"note";td.textContent=v;if(tab==="pat"&&i===2){td.style.whiteSpace="pre-wrap";td.style.fontSize="12.5px";}}else td.textContent=v;tr.appendChild(td);});tb.appendChild(tr);});
+  const foot=document.createElement("tr");if(!rows.length){const td=document.createElement("td");td.colSpan=head.length;td.className="note";td.textContent="Nothing in this tab lands on that rung.";foot.appendChild(td);tb.appendChild(foot);}
+  $("#count").textContent=rows.length+" of "+({ds:DS,alg:ALG,java:JAVA,pat:PAT}[tab]).length+(filter?" on "+CLS[IDX[filter]].n:"")+". * = amortized or average case.";}
+function buildCheats(){const c=$("#cheats");PAT.forEach(p=>{const d=document.createElement("div");d.className="cheat";const h=document.createElement("h3");h.textContent=p[0];const pre=document.createElement("pre");pre.textContent=p[3];const w=document.createElement("div");w.className="muted";w.style.fontSize="13px";w.textContent=p[4];d.append(h,chip(p[2]),pre,w);c.appendChild(d);});}
+
+buildLadder();buildLegend();buildTabs();buildCheats();setN();renderCat();
+try{const h=location.hash.slice(1);if(h&&document.getElementById(h))document.getElementById(h).scrollIntoView();}catch(e){}
+})();
+</script>
+
+</body>
+</html>
