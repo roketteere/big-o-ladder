@@ -5,6 +5,9 @@
 | CLS | the seven complexity classes, ladder order (fastest → slowest) |
 | IDX | class id → index in CLS |
 | DS / ALG / JAVA / PAT | catalog rows: data structures / algorithms / Java calls / code patterns |
+| OPS | per-structure operations (push, pop, lookup, rehash…), each its own search entry |
+| CONCEPTS | measuring vocabulary (amortized, worst case, space complexity…), no class chip |
+| boost | search-score bonus so an operation outranks its parent structure |
 | ENTRIES | flattened search index built from the four catalogs plus CLS |
 | clsOf | complexity string → class id (`"n log n"` → `nlogn`) |
 | lg / lgfact | log10 of a value / log10(n!) computed as a sum, to avoid overflow |

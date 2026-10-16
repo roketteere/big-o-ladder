@@ -159,7 +159,7 @@ footer{margin-top:48px;color:var(--ink-3);font-size:13px}
       <li><b>Search.</b> Type a data structure, algorithm, Java method or loop shape in the box. Pick a result to see its Big O for every operation and why. Press <code>/</code> to jump to the box.</li>
       <li><b>Ladder.</b> The seven rungs run fastest to slowest. Click one to filter the catalog to that class; click again to clear.</li>
       <li><b>Chart.</b> Drag the n slider, switch log/linear, and hover to read every class at one n. Turn O(2ⁿ) and O(n!) on in the legend to see why brute force dies.</li>
-      <li><b>Catalog.</b> Four tabs: data structures, algorithms, Java calls, code patterns. A <code>*</code> means amortized or average case; the worst case is in the notes.</li>
+      <li><b>Catalog.</b> Six tabs: operations (push, pop, enqueue, lookup, resize, reverse, traverse…), data structures, algorithms, Java calls, code patterns, and concepts (amortized, worst case, space complexity, stable…). A <code>*</code> means amortized or average case; the worst case is in the notes.</li>
       <li><b>Code patterns.</b> The cards at the bottom are the loop and recursion shapes from class. Match the shape, name the class.</li>
     </ol>
   </details>
@@ -322,6 +322,174 @@ const PAT=[ // [name, aliases, cls, code, why]
  ["Try every ordering",["all permutations","brute force ordering"],"n!","permute(prefix, rest) for every choice of next","n choices, then n − 1, then n − 2 …"],
 ];
 
+const OPS=[ // [operation, aliases, structure, cls, note]  -- one row per thing you'd actually do
+ // stack
+ ["push",["stack push","add to stack","push onto stack"],"Stack","1","Write at the top; amortized O(1) if the backing array must grow."],
+ ["pop",["stack pop","remove from stack","pop off stack"],"Stack","1","Remove the top. Undo in the Cavazos app is one pop + one push."],
+ ["peek / top",["stack peek","top of stack"],"Stack","1","Read the top without removing it."],
+ ["isEmpty / size (stack)",["stack isempty","stack size","empty stack check"],"Stack","1","A counter."],
+ ["search a stack",["find in stack","stack contains","stack search"],"Stack","n","You have to pop or walk through everything."],
+ // queue / deque
+ ["enqueue / offer / add",["enqueue","queue add","offer","add to queue"],"Queue","1","Append at the back."],
+ ["dequeue / poll / remove",["dequeue","queue remove","poll","remove from queue"],"Queue","1","Take from the front. ArrayDeque uses a circular buffer; LinkedList moves a pointer."],
+ ["peek / front",["queue peek","front of queue","first in line"],"Queue","1","Read the front."],
+ ["search a queue",["queue contains","find in queue"],"Queue","n","Walk it."],
+ ["addFirst / addLast",["push front","push back","deque add"],"Deque","1","Both ends are O(1)."],
+ ["removeFirst / removeLast",["pop front","pop back","deque remove"],"Deque","1","Both ends are O(1)."],
+ // array
+ ["read / write by index",["get by index","set by index","array access","arr[i]","index into array","random access"],"Array","1","Address arithmetic: base + i × size."],
+ ["search an unsorted array",["find in array","array contains","indexof array","scan array"],"Array","n","Linear search; nothing better without order."],
+ ["search a sorted array",["binary search array","find in sorted array"],"Sorted array","log n","Binary search halves the range each step."],
+ ["insert into an array at index",["insert middle of array","shift elements","insert at position"],"Array","n","Everything after the index shifts right."],
+ ["delete from an array at index",["remove from array","delete middle of array"],"Array","n","Everything after the index shifts left."],
+ ["append to a full static array",["grow array","resize array","copy array","Arrays.copyOf","System.arraycopy"],"Array","n","Allocate bigger, copy every element."],
+ ["traverse / iterate / print all",["loop over array","for each","print array","iterate list","visit every element"],"Array","n","One visit per element."],
+ ["find min or max in an unsorted array",["find max","find min","largest element","smallest element","Collections.max"],"Array","n","Must look at every element once."],
+ ["sum / average of an array",["sum array","average array","total"],"Array","n","One pass."],
+ ["reverse an array in place",["reverse array","swap ends"],"Array","n","Two pointers meeting in the middle."],
+ ["rotate an array",["rotate","shift array"],"Array","n","Three reversals, O(1) extra space."],
+ ["check if an array is sorted",["is sorted","verify sorted"],"Array","n","Compare each neighbor pair."],
+ ["merge two sorted arrays",["merge sorted","merge two sorted classes","week 6 lab"],"Array","n","Two pointers; n + m steps. The Week 6 lab and the heart of merge sort."],
+ ["find duplicates with a hash set",["find duplicates","detect duplicate","dedup","unique elements"],"Array + HashSet","n","Seen-set; brute force pair checking is O(n²)."],
+ ["find duplicates by brute force",["duplicates nested loop","compare every pair"],"Array","n²","Every pair."],
+ ["find the missing number",["missing number","nasa countdown","week 10 lab","dup and missing"],"Array + HashSet or sum","n","Hash set of seen values, or arithmetic on the expected sum. Week 10 lab."],
+ ["count frequency of each value",["frequency count","histogram","count occurrences","word count"],"HashMap","n","One pass incrementing map counts; Week 11 Miwok gold is this shape."],
+ ["two sum",["pair that sums to target","find pair with sum"],"HashMap","n","Map of complements; nested loops would be O(n²)."],
+ ["max subarray sum",["kadane","maximum subarray"],"Array","n","Kadane's running best."],
+ ["kth smallest / largest",["kth largest","kth smallest","quickselect","top k"],"Array / heap","n","Quickselect average O(n); a heap of size k gives O(n log k)."],
+ ["sort an array",["sort","sort list","arrays.sort","sort numbers"],"Array","n log n","Comparison sort floor is n log n; counting/radix beat it for integer keys."],
+ ["sort a nearly sorted array",["almost sorted","nearly sorted","sort with few swaps"],"Array","n","Insertion sort and TimSort run in O(n) on nearly sorted input."],
+ ["sort integers in a small range",["counting sort missiles","week 7 lab","sort by value range"],"Array","n","Counting sort: O(n + k). Week 7 missiles."],
+ ["pair socks with a stack",["sock pairs","week 8 lab","matching pairs","balanced brackets","valid parentheses"],"Stack","n","Push lefts, pop on rights, check the pattern. Same shape as bracket matching."],
+ // arraylist
+ ["add at end (ArrayList)",["arraylist add","append","list.add(x)"],"ArrayList","1*","Amortized; a doubling resize copies n elements now and then."],
+ ["add at index (ArrayList)",["list.add(i, x)","insert into arraylist","add at front arraylist"],"ArrayList","n","Shifts n − i elements."],
+ ["remove by index (ArrayList)",["list.remove(i)","remove from arraylist","remove first arraylist","remove(0)"],"ArrayList","n","Shifts; removing the last element is O(1)."],
+ ["remove by value (ArrayList)",["list.remove(object)","remove element arraylist"],"ArrayList","n","Search then shift."],
+ ["get / set by index (ArrayList)",["list.get(i)","list.set(i, x)","arraylist get"],"ArrayList","1","Backing array index."],
+ ["contains / indexOf (ArrayList)",["list.contains","list.indexof","arraylist search"],"ArrayList","n","Linear scan."],
+ ["size / isEmpty (ArrayList)",["list.size","arraylist size"],"ArrayList","1","Stored counter."],
+ ["clear (ArrayList)",["list.clear"],"ArrayList","n","Nulls every slot so the GC can collect."],
+ ["resize / grow (ArrayList)",["ensureCapacity","grow arraylist","arraylist resize"],"ArrayList","n","Copy into a 1.5× array; rare enough that add stays amortized O(1)."],
+ // linked list
+ ["insert at head (linked list)",["addfirst linked list","insert at front linked list","prepend"],"Linked list","1","Point the new node at the old head."],
+ ["insert at tail (linked list)",["addlast linked list","append linked list","insert at end linked list"],"Linked list","1","O(1) with a tail pointer; O(n) if you must walk to the end."],
+ ["insert after a given node",["insert after node","insert in middle linked list"],"Linked list","1","Two pointer updates, once you hold the node."],
+ ["delete head (linked list)",["removefirst linked list","delete first node"],"Linked list","1","Move the head pointer."],
+ ["delete tail (singly linked)",["removelast singly","delete last node singly"],"Singly linked list","n","Need the second-to-last node; walk to it."],
+ ["delete tail (doubly linked)",["removelast doubly","delete last node doubly"],"Doubly linked list","1","Tail.prev is one hop away."],
+ ["delete a given node",["remove node","delete node linked list"],"Doubly linked list","1","Doubly: relink prev and next. Singly: O(n) to find the predecessor."],
+ ["get by index (linked list)",["linkedlist get","nth node","access linked list"],"Linked list","n","Walk from the head; no arithmetic jump."],
+ ["search a linked list",["find in linked list","linkedlist contains"],"Linked list","n","Walk it."],
+ ["length of a linked list",["count nodes","linked list size","list length"],"Linked list","n","Walk it, or O(1) if the size is cached."],
+ ["reverse a linked list",["reverse linked list","reverse half","week 9 lab","forgot something at home"],"Linked list","n","Three pointers (prev, cur, next). Week 9 lab reverses half the directions."],
+ ["find the middle node",["middle of linked list","slow fast pointers"],"Linked list","n","Slow/fast pointers, one pass."],
+ ["detect a cycle",["cycle detection","floyd","tortoise and hare"],"Linked list","n","Floyd's slow/fast pointers, O(1) space."],
+ ["merge two sorted linked lists",["merge lists"],"Linked list","n","Walk both, n + m."],
+ // hash map / set
+ ["get / lookup by key",["hashmap get","map.get","lookup","key lookup","find by key","dictionary lookup"],"Hash map","1*","Hash the key, go to the bucket. Average; worst O(n) if all keys collide (Java 8+ treeifies a bucket to O(log n))."],
+ ["put / insert key-value",["hashmap put","map.put","insert into map","add key"],"Hash map","1*","Average; a rehash copies n entries now and then."],
+ ["containsKey",["has key","key exists","map contains"],"Hash map","1*","Same path as get."],
+ ["containsValue",["value exists","search values in map","find by value"],"Hash map","n","Values are not hashed; scan them all."],
+ ["remove a key",["hashmap remove","delete key","map.remove"],"Hash map","1*","Hash, unlink."],
+ ["iterate keys / values / entries",["loop over map","keyset","entryset","for each map"],"Hash map","n","Visits every bucket."],
+ ["rehash / resize (hash map)",["rehash","resize map","load factor"],"Hash map","n","Happens when load factor > 0.75; amortized away."],
+ ["add / contains / remove (hash set)",["hashset add","hashset contains","set contains","set.add","set membership","is in set"],"Hash set","1*","Same machinery as a hash map with no values."],
+ ["union / intersection of two sets",["set union","set intersection","set difference","overlap"],"Hash set","n","Walk one set, probe the other: O(n + m)."],
+ ["remove duplicates with a set",["dedupe list","unique values","distinct","no duplicates report","pyramids report"],"Hash set","n","Add everything, the set keeps one copy. The Pyramids requested-pyramids report."],
+ // trees
+ ["insert into a BST",["bst insert","tree insert","add to tree"],"Binary search tree","log n","O(height): log n balanced, n degenerate."],
+ ["search a BST",["bst search","find in tree","tree lookup","tree contains"],"Binary search tree","log n","Go left or right at each node: O(height)."],
+ ["delete from a BST",["bst delete","remove from tree"],"Binary search tree","log n","Find, then splice or swap with the in-order successor: O(height)."],
+ ["find min / max in a BST",["bst min","bst max","leftmost","rightmost"],"Binary search tree","log n","Walk left (min) or right (max): O(height)."],
+ ["insert / search / delete (balanced tree)",["treemap put","treemap get","treeset add","avl insert","red black insert","balanced tree ops"],"AVL / Red-Black / TreeMap","log n","Rotations keep height logarithmic."],
+ ["floor / ceiling / first / last (TreeMap)",["floorkey","ceilingkey","firstkey","lastkey","closest key"],"TreeMap","log n","Ordered-map queries a hash map cannot do."],
+ ["in-order traversal",["inorder","in order","print tree sorted","week 12 lab","left node right"],"Binary tree","n","Left, node, right; every node once. On a BST it prints sorted order."],
+ ["pre-order / post-order traversal",["preorder","postorder","node left right","left right node"],"Binary tree","n","Every node once."],
+ ["level-order traversal / BFS on a tree",["level order","bfs tree","breadth first tree"],"Binary tree","n","Queue, one level at a time."],
+ ["height of a tree",["tree height","depth of tree","max depth"],"Binary tree","n","Recursive max of children + 1 visits every node."],
+ ["check if a tree is symmetric",["symmetric tree","mirror tree","week 13 lab"],"Binary tree","n","Compare left and right subtrees in mirror order. Week 13 lab."],
+ ["validate a BST",["is bst","validate binary search tree"],"Binary tree","n","In-order must be increasing, or pass min/max bounds down."],
+ ["lowest common ancestor",["lca","common ancestor"],"Binary search tree","log n","O(height) on a BST; O(n) on a plain binary tree."],
+ // heap
+ ["insert / offer (heap)",["heap insert","pq offer","priorityqueue add","sift up","bubble up"],"Binary heap","log n","Append at the end, sift up the height."],
+ ["peek min / max (heap)",["heap peek","find min","find max heap","pq peek","top of heap"],"Binary heap","1","The root."],
+ ["poll / extract min (heap)",["heap remove","pq poll","extract min","remove root","sift down","heapify down"],"Binary heap","log n","Move the last to the root, sift down."],
+ ["build a heap from an array",["heapify","buildheap","make heap"],"Binary heap","n","Bottom-up heapify is O(n), not n log n."],
+ ["search / contains (heap)",["heap contains","find in heap","pq contains"],"Binary heap","n","Heaps are not search structures."],
+ ["delete an arbitrary element (heap)",["pq remove(object)","remove from heap"],"Binary heap","n","O(n) to find it, then O(log n) to fix."],
+ ["decrease key",["decreasekey","update priority"],"Binary heap","log n","Sift up after the change; what Dijkstra needs."],
+ ["relative ranks / top k with a heap",["relative ranks","week 14 lab","top k with heap","k largest"],"Binary heap","n log n","Push everything then pop; or keep a heap of size k for O(n log k). Week 14 lab."],
+ // trie
+ ["insert / search / startsWith (trie)",["trie insert","trie search","prefix search","autocomplete","starts with"],"Trie","k","k = length of the word, independent of how many words are stored."],
+ // graph
+ ["add a vertex",["add node graph","add vertex"],"Graph (adjacency list)","1","Append a list."],
+ ["add an edge",["add edge","connect nodes"],"Graph (adjacency list)","1","Append to the neighbor list (both lists if undirected)."],
+ ["check if an edge exists",["has edge","edge lookup","are connected"],"Graph (adjacency list)","n","O(deg(v)): scan one neighbor list. Adjacency matrix: O(1)."],
+ ["list the neighbors of a vertex",["neighbors","adjacent vertices"],"Graph (adjacency list)","n","O(deg(v)). Adjacency matrix: O(V)."],
+ ["remove a vertex",["delete vertex","remove node graph"],"Graph (adjacency list)","n","O(V + E): remove it from every neighbor list."],
+ ["breadth-first search",["bfs","shortest path unweighted","level by level"],"Graph","n","O(V + E) with a queue."],
+ ["depth-first search",["dfs","go deep","backtrack"],"Graph","n","O(V + E) with a stack or recursion."],
+ ["does a path exist between two nodes",["path exists","week 15 lab","find valid path","connected"],"Graph","n","BFS or DFS from the source: O(V + E). Week 15 lab."],
+ ["shortest path with weights",["dijkstra","weighted shortest path"],"Graph + heap","n log n","Dijkstra: O((V + E) log V) with a binary heap; positive weights only."],
+ ["minimum spanning tree",["mst","prim","kruskal"],"Graph","n log n","Prim O(E log V) or Kruskal O(E log E)."],
+ ["degree of a vertex",["degree","how many edges","influencer"],"Graph (adjacency list)","1","Length of its neighbor list (O(V) in a matrix)."],
+ // strings
+ ["length of a string",["string length","s.length()"],"String","1","Stored with the string."],
+ ["charAt",["character at index","s.charat"],"String","1","Backing array index."],
+ ["concatenate two strings",["concat","s1 + s2","join two strings"],"String","n","Copies both: O(n + m)."],
+ ["build a string with += in a loop",["string concat loop","repeated concatenation","s += in loop"],"String","n²","Each += copies the whole string so far."],
+ ["build a string with StringBuilder",["stringbuilder append loop","sb.append"],"StringBuilder","n","Amortized O(1) per append."],
+ ["equals / compareTo",["string equals","compare strings","string compare"],"String","n","Character by character until a difference."],
+ ["indexOf / contains (string)",["find substring","s.indexof","string contains","substring search"],"String","n","Naive scan is O(n·m); for short patterns that is effectively O(n)."],
+ ["substring",["s.substring","slice string"],"String","n","Copies k characters (Java 7+)."],
+ ["reverse a string",["reverse string","StringBuilder.reverse"],"String","n","One pass into a builder or char array."],
+ ["split a string",["s.split","tokenize"],"String","n","One pass."],
+ ["check palindrome",["palindrome","is palindrome"],"String","n","Two pointers from both ends."],
+ ["check anagram",["anagram","same letters"],"String","n","Count characters in a map or 26-slot array; sorting both would be O(n log n)."],
+ // recursion / math
+ ["power x^n by repeated multiplication",["naive power","multiply n times"],"Recursion","n","n multiplications."],
+ ["power x^n by squaring",["fast power","recursive power","power recursive function","exponentiation by squaring","extra credit power"],"Recursion","log n","power(x, n/2)² each level halves n."],
+ ["factorial recursively",["factorial","n!"],"Recursion","n","n frames."],
+ ["fibonacci naive recursion",["fib recursive","fibonacci"],"Recursion","2ⁿ","Two calls per level, no memo."],
+ ["fibonacci with memo or loop",["fib memo","dynamic programming fibonacci","fib iterative"],"Recursion + map","n","Each value computed once."],
+ ["generate all subsets",["subsets","power set","combinations of all sizes"],"Recursion","2ⁿ","Each element in or out."],
+ ["generate all permutations",["permutations","all orderings"],"Recursion","n!","n choices, then n − 1, …"],
+ ["binary search recursively",["recursive binary search","halve the range"],"Recursion","log n","One call of size n/2."],
+ ["tower of hanoi",["hanoi"],"Recursion","2ⁿ","2ⁿ − 1 moves."],
+];
+const CONCEPTS=[ // [term, aliases, definition]  -- the measuring vocabulary itself
+ ["Big O",["big-o","upper bound","asymptotic upper bound","worst case notation"],"The asymptotic upper bound: how the cost grows as n → ∞ in the worst case. Drop constants and lower-order terms: 3n² + 50n + 7 is O(n²)."],
+ ["Big Omega (Ω)",["omega","lower bound","best case notation"],"The asymptotic lower bound: the cost can never be better than this. Rarely asked in interviews; the professor mentions it once."],
+ ["Big Theta (Θ)",["theta","tight bound"],"Upper and lower bound at once: the cost grows exactly like this. Merge sort is Θ(n log n)."],
+ ["worst case",["worst-case","worst time"],"The slowest input of size n. Big O quotes this unless stated otherwise. Quick sort's worst case is O(n²) on an already-sorted array with a naive pivot."],
+ ["average case",["average-case","expected time","typical case"],"Cost over typical inputs. Hash map get is O(1) average, O(n) worst."],
+ ["best case",["best-case","fastest input"],"The luckiest input. Bubble sort with an early-exit flag is O(n) on sorted input."],
+ ["amortized",["amortized cost","amortised","averaged over operations"],"Average cost per operation over a long sequence, even though a single operation can be expensive. ArrayList.add is amortized O(1): most adds are one write, the occasional resize copies n."],
+ ["time complexity",["running time","how long it takes","time cost","speed"],"Number of basic operations as a function of input size n. The ladder on this page is time complexity."],
+ ["space complexity",["memory","extra space","auxiliary space","how much memory"],"Memory used as a function of n, usually counting only extra space beyond the input. Merge sort needs O(n) extra; heap sort O(1); recursion costs O(depth) of stack frames."],
+ ["auxiliary space",["extra memory","scratch space"],"Space complexity not counting the input itself. In-place algorithms use O(1) auxiliary space."],
+ ["in-place",["in place","no extra memory"],"Modifies the input using O(1) extra space. Quick sort and heap sort are in place; merge sort is not."],
+ ["stable sort",["stable","stability","keeps original order"],"Equal keys keep their original relative order. Merge sort and TimSort are stable; quick sort and heap sort are not. Matters when sorting by one field of a record."],
+ ["constant factor",["constants","drop constants","50n"],"Multipliers Big O ignores. 50n and n/2 are both O(n). Juanita's 5-day display is O(1) and still slow."],
+ ["lower-order terms",["drop lower terms","dominant term"],"Only the fastest-growing term survives: n² + n log n + 1000 is O(n²)."],
+ ["n",["input size","what is n","size of input"],"The size of the input: array length, number of nodes, number of characters. For graphs use V (vertices) and E (edges)."],
+ ["log n",["logarithm","log base 2","why log"],"How many times you can halve n before reaching 1. log₂ 1,000,000 ≈ 20. Shows up whenever each step discards half the work."],
+ ["n log n",["linearithmic"],"n steps, each costing log n (or log n levels each costing n). The floor for comparison sorting."],
+ ["polynomial time",["polynomial","n^c","tractable"],"O(n^c) for a constant c: n, n², n³. Considered feasible; the professor calls n² 'often unacceptably slow' and n^c 'very slow'."],
+ ["exponential time",["exponential","2^n","intractable"],"O(2ⁿ) and worse: doubling n squares the cost. Only brute force over subsets gets here."],
+ ["brute force",["naive","try everything","exhaustive"],"Try every possibility. Usually O(n²) for pairs, O(2ⁿ) for subsets, O(n!) for orderings."],
+ ["divide and conquer",["split in half","recursive halves"],"Split the input, solve the parts, combine. Two halves plus O(n) combine gives O(n log n); one half gives O(log n)."],
+ ["hashing",["hash","hash function","hash code","bucket"],"Turn a key into an array index so lookup is O(1) on average. A bad hash function sends everything to one bucket: O(n)."],
+ ["collision",["hash collision","same bucket"],"Two keys hash to the same bucket. Handled by chaining (a list per bucket) or probing; too many collisions degrade a hash map toward O(n)."],
+ ["load factor",["rehash threshold","0.75"],"entries ÷ buckets. Java rehashes a HashMap above 0.75 so chains stay short."],
+ ["LIFO",["last in first out","lifo"],"Last in, first out: a stack. push/pop/peek are O(1)."],
+ ["FIFO",["first in first out","fifo","no cutting"],"First in, first out: a queue. enqueue/dequeue/peek are O(1)."],
+ ["balanced tree",["balanced","self-balancing","height log n"],"A tree whose height stays O(log n) (AVL, red-black). Keeps insert/search/delete logarithmic; an unbalanced BST can degrade to O(n)."],
+ ["recursion depth",["stack depth","call stack","stack overflow"],"Each recursive call costs a stack frame, so recursion has O(depth) space. Linear recursion on n = 100,000 overflows; use a loop or a halving recursion."],
+ ["memoization",["memo","cache results","dynamic programming"],"Store answers to subproblems so each is computed once. Turns naive O(2ⁿ) Fibonacci into O(n)."],
+];
+
 /* ---------- normalize a complexity string to a class id ---------- */
 function clsOf(s){
   const t=String(s).replace(/\*/g,"").replace(/\s+/g,"").toLowerCase();
@@ -343,6 +511,8 @@ DS.forEach(r=>ENTRIES.push({kind:"Data structure",name:r[0],alias:r[1],main:r[5]
 ALG.forEach(r=>ENTRIES.push({kind:"Algorithm",name:r[0],alias:r[1],main:r[4],ops:{best:r[2],average:r[3],worst:r[4],space:r[5]},note:r[6]}));
 JAVA.forEach(r=>ENTRIES.push({kind:"Java call",name:r[0],alias:r[1],main:r[2],ops:{time:r[2]},note:r[3]}));
 PAT.forEach(r=>ENTRIES.push({kind:"Code pattern",name:r[0],alias:r[1],main:r[2],ops:{time:r[2]},note:r[4],code:r[3]}));
+OPS.forEach(r=>ENTRIES.push({kind:"Operation",name:r[0],alias:r[1],main:r[3],ops:{time:r[3],"on":r[2]},note:r[4],boost:10}));
+CONCEPTS.forEach(r=>ENTRIES.push({kind:"Concept",name:r[0],alias:r[1],main:"",ops:{},note:r[2]}));
 CLS.forEach(c=>ENTRIES.push({kind:"Complexity class",name:c.n,alias:[c.lbl,c.n.replace(/[()]/g,""),c.id],main:c.n.slice(2,-1),ops:{},note:FEEL[c.id]+". "+ ({"1":"Examples: array index, hash map get, stack push, heap peek.","logn":"Examples: binary search, balanced tree ops, heap insert, halving loops.","n":"Examples: linear search, one loop, list traversal, BFS/DFS on V+E.","nlogn":"Examples: merge sort, heap sort, TimSort, Arrays.sort.","n2":"Examples: bubble/insertion/selection sort, nested loops, string += in a loop.","2n":"Examples: naive Fibonacci, all subsets, brute-force passwords.","nf":"Examples: all permutations, travelling salesman by brute force."}[c.id])}));
 const norm=s=>s.toLowerCase().replace(/[^a-z0-9²³ⁿ!+·()\/]/g," ").replace(/\s+/g," ").trim();
 function score(e,q){
@@ -351,7 +521,7 @@ function score(e,q){
   for(const h of hay){ if(h===qn)best=Math.max(best,100); else if(h.startsWith(qn))best=Math.max(best,80); else if(h.includes(qn))best=Math.max(best,60);
     else{const toks=qn.split(" ");const hit=toks.filter(t=>t&&h.includes(t)).length;if(hit)best=Math.max(best,30*hit/toks.length);} }
   if(norm(e.note).includes(qn))best=Math.max(best,20);
-  return best;
+  return best?best+(e.boost||0):0; // an operation outranks the structure it belongs to on a tie
 }
 const q=$("#q"),res=$("#results"),ans=$("#answer"); let sel=-1,cur=[];
 function doSearch(){
@@ -361,14 +531,15 @@ function doSearch(){
   if(!cur.length){const d=document.createElement("div");d.className="empty";d.textContent="No match. Try the structure's other name (dictionary, vector, min heap) or a loop shape (nested loop, halving loop).";res.appendChild(d);}
   cur.forEach((e,i)=>{const b=document.createElement("button");b.setAttribute("role","option");b.id="opt"+i;
     const l=document.createElement("div");const nm=document.createElement("div");nm.className="name";nm.textContent=e.name;const sb=document.createElement("div");sb.className="sub";sb.textContent=e.kind;l.append(nm,sb);
-    b.append(l,chip(e.main));b.addEventListener("click",()=>show(e));res.appendChild(b);});
+    if(e.ops.on)sb.textContent=e.kind+" · "+e.ops.on;
+    b.append(l,e.main?chip(e.main):document.createTextNode(""));b.addEventListener("click",()=>show(e));res.appendChild(b);});
   sel=-1;res.hidden=false;q.setAttribute("aria-expanded","true");
 }
 function show(e){
   q.value=e.name;res.hidden=true;q.setAttribute("aria-expanded","false");ans.textContent="";ans.hidden=false;
   const c=clsOf(e.main);const i=c==null?null:IDX[c];ans.style.setProperty("--c",i==null?"var(--ink-3)":"var(--c"+i+")");
-  const k=document.createElement("div");k.className="eyebrow";k.textContent=e.kind; const big=document.createElement("div");big.className="big";big.textContent=e.name+"  →  O("+e.main.replace(/\*/g,"")+")"+(i==null?"":"  ·  "+CLS[i].lbl);
-  const dl=document.createElement("dl");Object.entries(e.ops).forEach(([kk,vv])=>{const dt=document.createElement("dt");dt.textContent=kk;const dd=document.createElement("dd");dd.appendChild(chip(vv,null,String(vv).includes("*")?" amortized/avg":""));dl.append(dt,dd);});
+  const k=document.createElement("div");k.className="eyebrow";k.textContent=e.kind+(e.ops.on?" on a "+e.ops.on:""); const big=document.createElement("div");big.className="big";big.textContent=e.main?e.name+"  →  O("+e.main.replace(/\*/g,"")+")"+(i==null?"":"  ·  "+CLS[i].lbl):e.name;
+  const dl=document.createElement("dl");Object.entries(e.ops).forEach(([kk,vv])=>{const dt=document.createElement("dt");dt.textContent=kk;const dd=document.createElement("dd");if(kk==="on"){dd.textContent=vv;dd.style.fontFamily="var(--sans)";}else dd.appendChild(chip(vv,null,String(vv).includes("*")?" amortized/avg":""));dl.append(dt,dd);});
   const why=document.createElement("div");why.className="why";why.textContent=e.note;
   ans.append(k,big); if(Object.keys(e.ops).length)ans.appendChild(dl); ans.appendChild(why);
   if(e.code){const pre=document.createElement("pre");pre.className="mono";pre.style.margin="0";pre.style.whiteSpace="pre-wrap";pre.style.color="var(--ink-2)";pre.textContent=e.code;ans.appendChild(pre);}
@@ -436,20 +607,22 @@ $("#y-lin").addEventListener("click",()=>{logY=false;$("#y-log").setAttribute("a
 $("#rate").addEventListener("change",e=>{rate=+e.target.value;updateTable();});
 
 /* ---------- catalog ---------- */
-const TABS=[["ds","Data structures"],["alg","Algorithms"],["java","Java calls"],["pat","Code patterns"]];let tab="ds";
+const TABS=[["ops","Operations"],["ds","Data structures"],["alg","Algorithms"],["java","Java calls"],["pat","Code patterns"],["con","Concepts"]];let tab="ops";
 function buildTabs(){const t=$("#tabs");TABS.forEach(([id,l])=>{const b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",tab===id?"true":"false");b.textContent=l;b.addEventListener("click",()=>{tab=id;t.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));renderCat();});t.appendChild(b);});
   const f=$("#filters");const all=document.createElement("button");all.textContent="All classes";all.setAttribute("aria-pressed","true");all.addEventListener("click",()=>setFilter(null));f.appendChild(all);
   CLS.forEach((c,i)=>{const b=document.createElement("button");b.dataset.id=c.id;b.setAttribute("aria-pressed","false");b.textContent=c.n;b.addEventListener("click",()=>setFilter(filter===c.id?null:c.id));f.appendChild(b);});}
 function rowMatches(cells){if(!filter)return true;return cells.some(v=>clsOf(v)===filter);}
 function renderCat(){const th=$("#cat thead"),tb=$("#cat tbody");th.textContent="";tb.textContent="";let rows=[],head=[];
-  if(tab==="ds"){head=["Structure","Access","Search","Insert","Delete","Space","Notes"];DS.forEach(r=>{if(rowMatches(r.slice(2,7)))rows.push([r[0],...r.slice(2,7).map(v=>chip(v,null,String(v).includes("*")?"*":"")),r[7]]);});}
+  if(tab==="ops"){head=["Operation","On","Time","Notes"];OPS.forEach(r=>{if(rowMatches([r[3]]))rows.push([r[0],r[2],chip(r[3],null,String(r[3]).includes("*")?"*":""),r[4]]);});}
+  else if(tab==="con"){head=["Term","What it measures or means"];CONCEPTS.forEach(r=>{if(!filter)rows.push([r[0],r[2]]);});}
+  else if(tab==="ds"){head=["Structure","Access","Search","Insert","Delete","Space","Notes"];DS.forEach(r=>{if(rowMatches(r.slice(2,7)))rows.push([r[0],...r.slice(2,7).map(v=>chip(v,null,String(v).includes("*")?"*":"")),r[7]]);});}
   else if(tab==="alg"){head=["Algorithm","Best","Average","Worst","Space","Notes"];ALG.forEach(r=>{if(rowMatches(r.slice(2,6)))rows.push([r[0],...r.slice(2,6).map(v=>chip(v)),r[6]]);});}
   else if(tab==="java"){head=["Call","Time","Notes"];JAVA.forEach(r=>{if(rowMatches([r[2]]))rows.push([r[0],chip(r[2],null,String(r[2]).includes("*")?"*":""),r[3]]);});}
   else {head=["Pattern","Class","Shape","Why"];PAT.forEach(r=>{if(rowMatches([r[2]]))rows.push([r[0],chip(r[2]),r[3],r[4]]);});}
   const trh=document.createElement("tr");head.forEach(h=>{const t=document.createElement("th");t.textContent=h;trh.appendChild(t);});th.appendChild(trh);
   rows.forEach(r=>{const tr=document.createElement("tr");r.forEach((v,i)=>{const td=document.createElement("td");if(i===0){td.className="nm";td.textContent=v;}else if(v instanceof Node){td.appendChild(v);}else if(i===r.length-1||(tab==="pat"&&i===2)){td.className=(tab==="pat"&&i===2)?"mono":"note";td.textContent=v;if(tab==="pat"&&i===2){td.style.whiteSpace="pre-wrap";td.style.fontSize="12.5px";}}else td.textContent=v;tr.appendChild(td);});tb.appendChild(tr);});
   const foot=document.createElement("tr");if(!rows.length){const td=document.createElement("td");td.colSpan=head.length;td.className="note";td.textContent="Nothing in this tab lands on that rung.";foot.appendChild(td);tb.appendChild(foot);}
-  $("#count").textContent=rows.length+" of "+({ds:DS,alg:ALG,java:JAVA,pat:PAT}[tab]).length+(filter?" on "+CLS[IDX[filter]].n:"")+". * = amortized or average case.";}
+  $("#count").textContent=rows.length+" of "+({ops:OPS,ds:DS,alg:ALG,java:JAVA,pat:PAT,con:CONCEPTS}[tab]).length+(filter?" on "+CLS[IDX[filter]].n:"")+(tab==="con"?"":". * = amortized or average case.");}
 function buildCheats(){const c=$("#cheats");PAT.forEach(p=>{const d=document.createElement("div");d.className="cheat";const h=document.createElement("h3");h.textContent=p[0];const pre=document.createElement("pre");pre.textContent=p[3];const w=document.createElement("div");w.className="muted";w.style.fontSize="13px";w.textContent=p[4];d.append(h,chip(p[2]),pre,w);c.appendChild(d);});}
 
 buildLadder();buildLegend();buildTabs();buildCheats();setN();renderCat();

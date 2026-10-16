@@ -11,11 +11,13 @@ Built for CIS-055 Data Structures (SJCC). No account, no install, works on a pho
 1. **Search.** Type what you are looking at: `hash map`, `dictionary`, `merge sort`, `ArrayList.get`, `nested loop`, `i /= 2`, `fib`. Pick a result to see the Big O for every operation (access, search, insert, delete, space, or best/average/worst) and a one-line reason. Press `/` to jump to the search box.
 2. **The ladder.** Seven rungs, fastest to slowest: O(1), O(log n), O(n), O(n log n), O(n²), O(2ⁿ), O(n!). Each shows the operation count at the current n. Click a rung to filter the catalog to that class; click again to clear.
 3. **The chart.** Drag the n slider from 10 to 1,000,000, switch between a log and a linear y-axis, and hover anywhere to read every class at one n. O(2ⁿ) and O(n!) start switched off because they flatten the others; turn them on in the legend to watch them leave the chart. The table under the chart converts operations into wall time at 1 million, 1 billion or 1 trillion operations per second.
-4. **The catalog.** Four tabs:
+4. **The catalog.** Six tabs:
+   - **Operations** (122): the thing you actually do, one row each. `pop`, `enqueue`, `peek`, `get by index`, `insert at head`, `resize an ArrayList`, `reverse a linked list`, `lookup by key`, `rehash`, `heapify`, `in-order traversal`, `BFS`, `substring`, `fast power`, and the shape of every weekly lab. Searching an operation name gives you the operation, not the whole structure.
    - **Data structures** (21): array, ArrayList, linked lists, stack, queue, deque, hash map, hash set, BST, balanced trees, heap, trie, graphs, strings, and more, with access, search, insert, delete and space.
    - **Algorithms** (29): every sort from bubble to TimSort, linear and binary search, BFS, DFS, Dijkstra, Prim, Kruskal, fast power, naive Fibonacci, permutations, with best, average, worst and space.
    - **Java calls** (23): what `ArrayList.get`, `HashMap.put`, `String +=` in a loop, `Arrays.sort`, `PriorityQueue.poll` and friends actually cost.
    - **Code patterns** (12): single loop, nested loop, halving loop, recursion shapes, divide and conquer.
+   - **Concepts** (29): the measuring vocabulary itself. Big O vs Ω vs Θ, worst/average/best case, amortized, time vs space complexity, auxiliary space, in-place, stable sort, constant factors, hashing, collisions, load factor, LIFO/FIFO, recursion depth, memoization.
    A `*` means amortized or average case; the worst case is in the notes column.
 5. **Read the code, name the class.** The cards at the bottom show each loop or recursion shape as code. Match the shape you see in a problem to a card and you have the class.
 
@@ -60,6 +62,8 @@ All the data is at the top of the `<script>` block in `src/page.html`:
 | `ALG` | algorithms | `[name, [aliases], best, average, worst, space, note]` |
 | `JAVA` | Java calls | `[name, [aliases], time, note]` |
 | `PAT` | code patterns | `[name, [aliases], class, code, why]` |
+| `OPS` | operations | `[operation, [aliases], structure, class, note]` |
+| `CONCEPTS` | measuring terms | `[term, [aliases], definition]` |
 
 Write complexities the way they appear in the tables (`1`, `log n`, `n`, `n log n`, `n²`, `2ⁿ`, `n!`, `V + E`). Add a `*` for amortized or average. Aliases are what the search box matches, so add the other names people use (`dictionary`, `vector`, `min heap`). Rebuild, open `index.html`, commit.
 
